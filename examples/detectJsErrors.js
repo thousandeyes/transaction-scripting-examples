@@ -6,6 +6,12 @@ runScript();
 
 async function runScript() {
 
+    // Ensure we're not pulling in logs from prior pages/tests
+    // Calling this function will clear out the logs up to the point
+    await driver.manage().logs().get('browser');
+
+    await driver.get('https://wikipedia.org');
+
     // Throw an error on a delay to simulate an uncaught JS error
     await driver.executeScript(`setTimeout(() => { throw new Error('Simulate Uncaught Error') }, 0)`);
     const browserLogs = await driver.manage().logs().get('browser');
