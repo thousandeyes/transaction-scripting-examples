@@ -2,9 +2,9 @@ import { By, Key } from 'selenium-webdriver';
 import { driver, credentials, markers } from 'thousandeyes';
 
 // Template Values
-let email = 'tonystark@acmehero.onmicrosoft.com';
-let credentialName = 'tonystark';
-let sendToEmail = 'tonystark@acmehero.onmicrosoft.com';
+const loginEmail = '<<loginEmail>>';         // 'tonystark@acmehero.onmicrosoft.com';
+const credentialName = '<<credentialName>>'; // 'tonystark';
+const sendToEmail = '<<loginEmail>>';        // 'tonystark@acmehero.onmicrosoft.com';
 
 runScript();
 
