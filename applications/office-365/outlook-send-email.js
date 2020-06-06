@@ -1,3 +1,4 @@
+
 import { By, Key } from 'selenium-webdriver';
 import { driver, credentials, markers } from 'thousandeyes';
 
@@ -34,29 +35,31 @@ async function runScript() {
   await markerClick(By.id('idBtn_Back'), "Login", "Compose Email");
 
   // Click on 'New message'
-  await click(By.id(`id__20`));
+  await click(By.id(`id__3`));
 
-  await typeText (myemail, By.css(`input.ms-BasePicker-input.pickerInput_ecad0f63`));
+  await typeText (myemail, By.css('input.ms-BasePicker-input.pickerInput_8d9d7e4e'));
   //await typeText('', By.css(`[role="combobox"]:nth-child(3)`));
 
   await driver.sleep(500);
 
-  await typeText (Key.TAB, By.css(`input.ms-BasePicker-input.pickerInput_ecad0f63`));
+  await typeText (Key.TAB, By.css('input.ms-BasePicker-input.pickerInput_8d9d7e4e'));
 
   // Click on 'Add a subject'
-  await click(By.id(`subjectLine0`));
+  //await click(By.id(`subjectLine0`));
+  await click(By.css(`[aria-label="Add a subject"]`));
 
   let subject = "Hello " + Date.now();
-  await typeText(subject, By.id(`subjectLine0`));
+  await typeText(subject, By.css(`[aria-label="Add a subject"]`));
   await console.log("Sent: " + subject);
 
   // Click on 'Send'
   await markerClick(By.css(`[aria-label="Send"]`), "Compose Email", "Email Round Trip");
 
-  await driver.sleep(200);
+  await driver.sleep(500);
 
   await findElementWithText(subject);
   markers.stop('Email Round Trip');
+  await driver.takeScreenshot();
   await console.log("Found email inbox: " + subject);
   
 }
