@@ -24,6 +24,7 @@ async function callServer(host, port) {
     await checkCode(response,250);
     await sock.writeAll('QUIT\r\n');
     response = await sock.read();
+    await sock.end()
 }
 
 async function checkCode(response,correctCode){
