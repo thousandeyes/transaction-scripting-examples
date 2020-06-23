@@ -10,7 +10,7 @@ async function runScript() {
     // Set host and port
     let host = 'smtp.gmail.com';
     let port = 587;
-    let resp = await callServer(host, port);
+    await callServer(host, port);
 
 };
 async function callServer(host, port) {
