@@ -2,7 +2,7 @@
     A script that checks availability of an SMTP Server by connecting to the service and evaluating the response code.
 */
 
-import { net, driver, markers, credentials, downloads, transaction, authentication } from 'thousandeyes';
+import { net } from 'thousandeyes';
 import assert from 'assert';
 runScript();
 
