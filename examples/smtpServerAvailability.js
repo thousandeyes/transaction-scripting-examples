@@ -2,7 +2,6 @@
     A script that checks availability of an SMTP Server by connecting to the service and evaluating the response code.
 */
 
-import { By, Key, until } from 'selenium-webdriver';
 import { net, driver, markers, credentials, downloads, transaction, authentication } from 'thousandeyes';
 import assert from 'assert';
 runScript();
