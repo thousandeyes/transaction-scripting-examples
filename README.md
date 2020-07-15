@@ -1,5 +1,8 @@
 # ThousandEyes Transaction Scripting Examples
-A collection of example scripts for use in both the ThousandEyes Platform and ThousandEyes Recorder.
+A collection of example ThousandEyes synthetic tranaction scripts that can be used as a reference when creating transaction tests in ThousandEyes or the ThousandEyes IDE Recorder.
+
+Note - this project contains example code and is not covered under ThousandEyes support.
+
 
 ## Getting Started
 To get started scripting, download the [ThousandEyes Recorder](https://app.thousandeyes.com/settings/tests/) from the Transaction test settings page in the ThousandEyes application or use one of the following download links:
