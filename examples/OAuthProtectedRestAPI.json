@@ -71,14 +71,22 @@ async function runScript() {
     const apiResponseJson = await apiResponse.json();
     await markers.stop('API Query Time');
 
+    /*
+        Put the complete API response into a screenshot
+    */
+    const apiResponseText = JSON.stringify(apiResponseJson, null, 4);
+    await driver.executeScript(`document.getElementsByTagName('body')[0].remove();document.write('<textarea id="output" style="width:100%;height:100%" rows="" cols=""></textarea>');`)
+    var textArea = await driver.findElement(By.id('output'));
+    await textArea.sendKeys(apiResponseText);
+    await driver.takeScreenshot();
+
 
     /*
         Validate the API output
         If a property is not 'ok', add it to error message and throw an error.
     */
-    const apiResponseText = JSON.stringify(apiResponseJson, null, 4);
     if (!('globalChecks' in apiResponseJson)) {
-        throw new Error('API response JSON is missing \'globalChecks\':\n' + apiResponseText);
+        throw new Error('API response JSON is missing \'globalChecks\'');
     }
 
     let errorMessage = '';
@@ -92,13 +100,5 @@ async function runScript() {
     if (errorMessage.length > 0) {
         throw new Error(errorMessage);
     }
-
-    /*
-        Put the complete API response into a screenshot
-    */
-    await driver.executeScript(`document.getElementsByTagName('body')[0].remove();document.write('<textarea id="output" style="width:100%;height:100%" rows="" cols=""></textarea>');`)
-    var textArea = await driver.findElement(By.id('output'));
-    await textArea.sendKeys(apiResponseText);
-    await driver.takeScreenshot();
 
 };
