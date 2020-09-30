@@ -34,34 +34,32 @@ async function runScript() {
   await markerClick(By.id('idBtn_Back'), "Login", "Compose Email");
 
   // Click on 'New message'
-  await click(By.id(`id__20`));
+  await click(By.id(`id__3`));
 
-  // #app > div > div._3KAPMPOz8KsW24ooeUflK2 > div._2jR8Yc0t2ByBbcz_HIGqZ4 > div > div._3mBjlqTqXMUiRuuWRKCPtX.css-41 > div._1jw6v9zFEgnOiXShpU1qqM > div > div.mm4nCLKbIRtx5HvuorDWT > div._1QDTZfBsizkS8O4Jej5a3A > div > div > div > div._29NreFcQ3QoBPNO3rKXKB0 > div._3Yr_hO7j5doGUkhrRiP6uY > div:nth-child(1) > div:nth-child(1) > div._31eKqae41uP_KBAvjXjCLQ > div > div > div > div > div.ms-FocusZone.css-57 > div > div > input
-  ////*[@id="app"]/div/div[2]/div[1]/div/div[3]/div[2]/div/div[3]/div[1]/div/div/div/div[1]/div[1]/div[1]/div[1]/div[1]/div/div/div/div/div[1]/div/div/input
-  await typeText(sendToEmail, By.css(`input.ms-BasePicker-input.pickerInput_ecad0f63`));
-
-  await driver.sleep(500);
-
-  await typeText(Key.TAB, By.css(`input.ms-BasePicker-input.pickerInput_ecad0f63`));
-
-  // Click on 'Add a subject'
-  await click(By.id(`subjectLine0`));
+  await typeText(sendToEmail, By.css(`[aria-label="To"]`));
 
   let subject = "Hello " + Date.now();
-  await typeText(subject, By.id(`subjectLine0`));
-  await console.log("Sent: " + subject);
+
+  await typeText(subject, By.css(`input[aria-label="Add a subject"]`));
 
   // Click on 'Send'
-  await markerClick(By.css(`[aria-label="Send"]`), "Compose Email", "Email Round Trip");
+  await markerClick(By.css(`button[name="Send"]`), "Compose Email", "Email Round Trip");
 
-  await driver.sleep(200);
+  await pollForEmail(subject);
 
-  await findElementWithText(subject);
   markers.stop('Email Round Trip');
-  await console.log("Found email inbox: " + subject);
 
   await driver.takeScreenshot();
+}
 
+async function pollForEmail(subject) {
+    let unread = "Unread Tony Stark " + subject;
+    const clickAttemptEndTime = Date.now() + 20000;
+    await reattemptUntil(waitForUnreadk, clickAttemptEndTime);
+    async function waitForUnreadk() {
+        await click(By.css('button[name="Focused"]'));
+        await driver.findElement(By.css(`div[aria-label^="${unread}"]`));
+    }
 }
 
 async function findElementWithText(text) {
@@ -73,10 +71,10 @@ async function clickText(text) {
 }
 
 async function markerClick(selector, markerStop, markerStart) {
-  await driver.findElement(selector);
+  var element = await driver.findElement(selector);
   await markers.stop(markerStop);
   await markers.start(markerStart);
-  await click(selector);
+  await element.click(); //click(selector);
 }
 
 async function configureDriver() {
@@ -88,6 +86,8 @@ async function configureDriver() {
     implicit: 7 * 1000 // If an element is not found, reattempt for this many milliseconds
   });
 }
+
+
 
 async function typeText(value, selector) {
   await simulateHumanDelay();
