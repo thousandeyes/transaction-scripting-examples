@@ -54,8 +54,13 @@ async function runScript() {
   markerStart("Compose Message");
 
   // Start a new chat
-  await click(By.css(`[aria-label="New chat"]`));
-  await typeText(targetUser + Key.RETURN, By.css(`[data-tid="peoplePicker"]`)); 
+  await click(By.css(`[aria-label="Chat Toolbar"]`));
+
+  //Click "New Chat (Alt+N)"
+  await click(By.css(`[aria-label="New Chat (Alt+N)"]`));
+
+  //Compose Text to Pepper
+  await typeText('Pepper Potts' + Key.RETURN, By.css(`[data-tid="peoplePicker"]`)); 
 
   markerStop("Compose Message");
   markerStart("Send Message");
