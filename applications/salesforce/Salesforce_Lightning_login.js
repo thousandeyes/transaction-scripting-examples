@@ -2,7 +2,7 @@
 // waits for all objects to load, takes a screenshot, and then logs out
 
 import { By, until } from 'selenium-webdriver';
-import { driver, browser, credentials, markers } from 'thousandeyes';
+import { driver, credentials, markers } from 'thousandeyes';
 
 runScript();
 

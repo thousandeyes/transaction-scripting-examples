@@ -1,5 +1,5 @@
 import { By, Key } from 'selenium-webdriver';
-import { driver, browser } from 'thousandeyes';
+import { driver } from 'thousandeyes';
 
 runScript();
 
