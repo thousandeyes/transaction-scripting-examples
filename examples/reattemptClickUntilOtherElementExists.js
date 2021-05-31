@@ -38,7 +38,7 @@ async function reattemptClickUntilOtherElementExists(clickSelector, existSelecto
         try {
             let e = await driver.findElement(clickSelector);
             clicked = true;
-            e.click();
+            await e.click();
         } catch (e) {
             if (!clicked) {
                 lastError = e;
