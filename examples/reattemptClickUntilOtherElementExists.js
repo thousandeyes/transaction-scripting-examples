@@ -8,39 +8,58 @@
     Author: primoz@thousandeyes.com
 */
 
-
-
 import { By, Key } from 'selenium-webdriver';
 import { driver, credentials, markers } from 'thousandeyes';
 
 runScript();
 
 async function runScript() {
-    
-    await driver.get('https://google.com')
-    await reattemptClickUntilOtherElementExists(By.xpath(`//button`), By.xpath(`//div[.="Some content opened by the button click"]`));
+
+    await configureDriver();
+
+    // Load page
+    await driver.get('https://cisco.com');
+
+    // Keep clicking 'Products' every 100ms until 'cdc-nav' element is present.
+    await reattemptClickUntilOtherElementExists(By.xpath(`//a[text()='Meraki']`), By.xpath(`//title[contains(text(), 'Cisco Meraki')]`));
+
+    await driver.takeScreenshot();
 
 }
 
 async function reattemptClickUntilOtherElementExists(clickSelector, existSelector) {
-    const configuredTimeouts = await driver.manage().getTimeouts();
-    const configuredImplicitTimeout = configuredTimeouts.implicit;
-    const attemptEndTime = Date.now() + configuredImplicitTimeout;
-    await driver.manage().setTimeouts({implicit: 50});
+    let configuredTimeouts = await driver.manage().getTimeouts();
+    let implicitTimeout = configuredTimeouts.implicit;
+    let attemptEndTime = Date.now() + implicitTimeout;
+    await driver.manage().setTimeouts({ implicit: 100 });
+    let clicked = false;
+    let lastError;
     while (Date.now() < attemptEndTime) {
         try {
-            await driver.findElement(clickSelector).click();
+            let e = await driver.findElement(clickSelector);
+            clicked = true;
+            await e.click();
+        } catch (e) {
+            if (!clicked) {
+                lastError = e;
+            }
+        }
+        try {
             await driver.findElement(existSelector);
-            // If both awaits threw no error, we can continue
-            await driver.manage().setTimeouts({implicit: configuredImplicitTimeout});
+            await driver.manage().setTimeouts({ implicit: implicitTimeout });
             return;
+        } catch (e) {
+            if (clicked) {
+                lastError = e;
+            }
         }
-        catch {
-
-        }
-        // One of the awaits didn't match, retry in a bit
-        await driver.sleep(50);
     }
-    console.log(Date.now());
-    throw new Error('reattemptClickUntilOtherElementExists(' + clickSelector + ', ' + existSelector + ') timed out.');
+    await driver.manage().setTimeouts({ implicit: implicitTimeout });
+    throw lastError;
+}
+
+async function configureDriver() {
+    await driver.manage().setTimeouts({
+        implicit: 7 * 1000, // If an element is not found, reattempt for this many milliseconds
+    });
 }
