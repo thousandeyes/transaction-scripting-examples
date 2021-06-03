@@ -39,7 +39,7 @@ async function runScript() {
   await markerClick(By.id('idBtn_Back'), "Login", "Backend Load");
 
   // Wait for chat page to load
-  await driver.wait(until.elementIsVisible(await driver.findElement(By.css(`.team-information`))));
+  await driver.wait(until.elementIsVisible(await driver.findElement(By.css(`.team-information`))), 30, "Teams Landing Page Failed to Load");
 
   // Dismiss popups
   await clickPeriodic(By.css(`[data-tid="closeModelDialogBtn"]`), 200);
