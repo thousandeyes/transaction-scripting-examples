@@ -1,5 +1,5 @@
 # ThousandEyes - API Transaction Examples
-These .js files are a collection of Javascript synthetic transaction examples for testing various REST API endpoints. Each of the .js scripts listed here represent a complete transaction test and can be used standalone. 
+These .js files are a collection of Javascript synthetic transaction examples for testing various REST API endpoints. Each of the .js scripts listed here represents a complete transaction test and can be used standalone. 
 
 ## How to Use
 1. Clone the repository or just download/copy an individual .js transaction script file. 
