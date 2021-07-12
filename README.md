@@ -1,5 +1,5 @@
 # ThousandEyes Transaction Scripting Examples
-A collection of example ThousandEyes synthetic tranaction scripts that can be used as a reference when creating transaction tests in ThousandEyes or the ThousandEyes IDE Recorder.
+A collection of example ThousandEyes synthetic transaction scripts that can be used as a reference when creating transaction tests in ThousandEyes or the ThousandEyes IDE Recorder.
 
 Note - this project contains example code and is not covered under ThousandEyes support.
 
@@ -12,7 +12,18 @@ To get started scripting, download the [ThousandEyes Recorder](https://app.thous
 
 New to synthetic scripting? Check out our [Transaction Scripting Guide](https://docs.thousandeyes.com/product-documentation/tests/transaction-scripting-guide).
 
+<!-- OL -->
+1. This is step #1.
+2. This is step #2.
+
+<!-- Table -->
+| OS      | Version |
+| --------| --------|
+| Windows | Windows Server 2012 R2 |
+
+
 ## Resources
 * [Getting Started guide](https://github.com/thousandeyes/transaction-scripting-examples/wiki/Getting-started-with-ThousandEyes-Synthetics).
 * [Troubleshooting Synthetics scripts](https://github.com/thousandeyes/transaction-scripting-examples/wiki/Troubleshooting-synthetics-scripts).
 * [Selenium Webdriver Documentation](https://seleniumhq.github.io/selenium/docs/api/javascript/index.html).
+
