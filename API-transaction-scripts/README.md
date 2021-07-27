@@ -7,3 +7,4 @@ These .js files are a collection of Javascript synthetic transaction examples fo
 3. Paste in the contents of .js transaction script file (or select `Import from JS File`)
 4. Set any other test settings and save the test. Recommended to start with 3-5 agents, Round Robin testing with 10/1 minute test intervals. 
 5. Create a a new credential or rename the credential name in the transaction script to use your own. Open the Transaciton test, select the credentials button and check your credential. Make sure your credential name matches what's used in the transaction.
+
