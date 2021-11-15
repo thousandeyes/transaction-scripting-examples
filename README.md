@@ -10,7 +10,7 @@ To get started scripting, download the [ThousandEyes Recorder](https://app.thous
 * MacOS - MacOS 10.10 (Yosemite) or later - [Download - Mac dmg](https://downloads.thousandeyes.com/tedit/recorder/ThousandEyesRecorderIDE.dmg)
 * Linux - Ubuntu 12.04 or later - [Download Linux AppImage](https://downloads.thousandeyes.com/tedit/recorder/ThousandEyesRecorderIDE.AppImage)
 
-New to synthetic scripting? Start by reviewing the ThousandEyes product documentation for [Transaction Tests](https://docs.thousandeyes.com/product-documentation/browser-synthetics/transaction-tests), and the pages under Transaction Scripting Reference (https://docs.thousandeyes.com/product-documentation/browser-synthetics/transaction-tests/transaction-scripting-reference).
+New to synthetic scripting? Start by reviewing the ThousandEyes product documentation for [Transaction Tests](https://docs.thousandeyes.com/product-documentation/browser-synthetics/transaction-tests), and the pages under [Transaction Scripting Reference](https://docs.thousandeyes.com/product-documentation/browser-synthetics/transaction-tests/transaction-scripting-reference).
 
 ## Resources
 * [Getting Started guide](https://github.com/thousandeyes/transaction-scripting-examples/wiki/Getting-started-with-ThousandEyes-Synthetics).
