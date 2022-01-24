@@ -17,10 +17,10 @@ async function runCode() {
     sock.setEncoding('utf8');
 
     markers.start('get ssh connect message');
-    // close our end of the connection.  we won't be sending anything.
-    await sock.end();
     // ...read enough bytes from the server to validate that it's running SSH protocol version 2.0
     const response = await sock.read(7);
+    // close our end of the connection.  we won't be sending anything.
+    await sock.end();
     markers.stop('get ssh connect message');
 
     // validate that the response looks like an HTTP response
