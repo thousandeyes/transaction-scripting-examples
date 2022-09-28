@@ -30,7 +30,7 @@ async function runScript() {
         Fetch the Access token from the OAuth service
     */
     await markers.start('OAuth Query Time');
-    const buffer = new Buffer(clientId + ':' + clientSecret);
+    const buffer = Buffer.from(clientId + ':' + clientSecret);
     const basicHash = buffer.toString("base64");
     const oauthRequest = {
         method: 'POST',
