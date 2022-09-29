@@ -11,8 +11,7 @@ runScript();
 async function runScript() {
 
     // update with your ThousandEyes username - typically your email address
-    //const username = 'username@example.com';
-    const username = 'emarkwardt@thousandeyes.com';
+    const username = 'username@example.com';
 
     // retrieve the Basic authentication token from the credential stored as 'TE-API-Basic-token'
     // in the ThousandEyes Credentials Repository
