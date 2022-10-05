@@ -13,12 +13,13 @@ async function runScript() {
     // update with your ThousandEyes username - typically your email address
     const username = 'username@example.com';
 
-    // retrieve the Basic authentication token from the ThousandEyes Credentials Repository
+    // retrieve the Basic authentication token from the credential stored as 'TE-API-Basic-token'
+    // in the ThousandEyes Credentials Repository
     const token = credentials.get('TE-API-Basic-token');
 
     // encode the token
-    var buffer = new Buffer(username+':'+token);
-    var apiToken = buffer.toString("base64");
+    var buffer = Buffer.from(username+':'+token);
+    var apiToken = buffer.toString('base64');
 
     // set the method and headers in the request body
     var requestBody = {

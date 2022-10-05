@@ -6,16 +6,22 @@
 import { By, Key, until } from 'selenium-webdriver';
 import fetch from 'node-fetch';
 import assert from 'assert';
+import { credentials, markers } from 'thousandeyes'
 
 runScript();
 
 async function runScript() {
 
-    const username = 'noreply@thousandeyes.com';
-    const password = 'g351mw5xqhvkmh1vq6zfm51c62wyzib2';
+    // replace the username string with your ThousandEyes login
+    const username = 'user@example.com';
+
+    // retrieve the Basic authentication token from the credential stored as 'TE-Basic-token'
+    // in the ThousandEyes Credentials Repository
+    const password = credentials.get('TE-Basic-token');
+    
     // Encode credentials in base64
-    let buffer = new Buffer(username+':'+password);
-    let apiToken = buffer.toString("base64");
+    let buffer = Buffer.from(username+':'+password);
+    let apiToken = buffer.toString('base64');
 
     let requestBody = {
         method: 'GET',
@@ -24,7 +30,10 @@ async function runScript() {
         }
     }
 
+    markers.start('fetch');
     let response = await fetch('https://api.thousandeyes.com/v6/tests.json', requestBody);
+    markers.stop('fetch');
+
     if (!response.ok) {
         assert.fail(response.status + ' ' + response.statusText);
     }

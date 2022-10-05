@@ -1,25 +1,30 @@
 import { By, Key, until } from 'selenium-webdriver';
 import { driver, credentials, markers } from 'thousandeyes';
 
+// TODO: update with your specific login and password credentalName
+const loginEmail = '<<loginEmail>>'; // 'user@example.com'
+// use the same credentialName as what's used to store the Salesforce password in your ThousandEyes credentials repository
+const credentialName = '<<credentialName>>';
+
 runScript();
 
 async function runScript() {
   await configureDriver();
 
+  markers.start('Page Load');
   await driver.get('https://login.salesforce.com');
+  markers.stop('Page Load');
 
+  markers.start('Login');
   await click(By.id(`username`));
-
-  await typeText('fake_username@fake.domain', By.id(`username`));
+  await typeText(loginEmail, By.id(`username`));
 
   await click(By.id(`password`));
-
-
-  await typeText("fake_password", By.id(`password`));
+  await typeText(credentials.get(credentialName), By.id(`password`));
 
   // Click on 'Log In'
   await click(By.id(`Login`));
-
+  markers.stop('Login');
  
   // I'm not yet sure why the click isn't working, but you can just load the next page
   await driver.get("https://expedia.lightning.force.com/lightning/o/Case/list?filterName=Recent");

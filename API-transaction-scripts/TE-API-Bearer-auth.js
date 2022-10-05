@@ -10,7 +10,8 @@ runScript();
 
 async function runScript() {
 
-    // retrieve the Bearer authentication token from the ThousandEyes Credentials Repository
+    // retrieve the Bearer authentication token from the credential stored as 'TE-API-Bearer-token'
+    // in the ThousandEyes Credentials Repository
     const apiToken = credentials.get('TE-API-Bearer-token');
 
     // set the method and headers in the request body
