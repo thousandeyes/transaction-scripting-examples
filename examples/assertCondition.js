@@ -8,7 +8,7 @@ async function runScript() {
     
     await driver.get('https://www.x-rates.com/table/?from=USD&amount=1');
 
-    const usdToEuroRateCell = await driver.findElement(By.css(`[href="http://www.x-rates.com/graph/?from=USD&to=EUR"]`));
+    const usdToEuroRateCell = await driver.findElement(By.css(`[href="https://www.x-rates.com/graph/?from=USD&to=EUR"]`));
     const currentUsdToEuroRate = Number(usdToEuroRateCell.getText());
 
     const isOneEuroWorthMoreThanTwoUsd = currentUsdToEuroRate < 0.5;
