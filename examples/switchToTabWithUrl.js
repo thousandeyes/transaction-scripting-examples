@@ -1,3 +1,9 @@
+/*
+    Transaction scripts can open new pages in new tabs/windows. This example shows how to switch to a new tab/window based on the
+    URL.
+    Author: primoz@thousandeyes.com
+*/
+
 import { By, Key } from 'selenium-webdriver';
 import { driver } from 'thousandeyes';
 
@@ -9,14 +15,15 @@ async function runScript() {
         implicit: 7 * 1000 // If an element is not found, reattempt for this many milliseconds
     });
 
-    await driver.get('https://developer.thousandeyes.com/');
+    await driver.get('https://developer.cisco.com/docs/thousandeyes/');
 
-    await openInNewTab(By.xpath(`//a[text()='Product Documentation']`));
+    await driver.findElement(By.xpath(`//a[text()='API Changelog']`)).click();
+    await openInNewTab(By.xpath(`//a[text()='Changelog']`));
 
     await switchToTabWithUrl('https://docs.thousandeyes.com');
     await driver.takeScreenshot();
 
-    await switchToTabWithUrl('https://developer.thousandeyes.com');
+    await switchToTabWithUrl('https://developer.cisco.com/');
     await driver.takeScreenshot();
 }
 
