@@ -12,13 +12,5 @@ const settings = test.getSettings();
 await driver.get(settings.url);
 
 let elementList = await driver.findElements(By.xpath("//article[contains(@id, 'post')]"));
-     let count = 0;
-     for (let el of elementList) {
-          if (el) {
-               count++;
-          }
-     }
-     
-     assert(count > 3, "Not enough elements found: " + count);
-
+     assert(elementList.length > 3, "Not enough elements found: " + elementList.length);
 }
