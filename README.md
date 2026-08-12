@@ -3,6 +3,8 @@ A collection of example ThousandEyes synthetic transaction scripts that can be u
 
 Note - This project contains example code and is not covered under ThousandEyes support.
 
+Test
+
 
 ## Getting Started
 To get started scripting, download the [ThousandEyes Recorder](https://app.thousandeyes.com/settings/tests/) from the Transaction test settings page in the ThousandEyes application or use one of the following download links:
