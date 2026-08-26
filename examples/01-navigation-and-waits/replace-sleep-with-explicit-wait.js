@@ -22,10 +22,10 @@ async function runScript() {
   await input.clear();
   await input.sendKeys(SEARCH_TERM, Key.RETURN);
 
-  const result = await waitForVisible(SELECTORS.result, 20 * 1000);
+  await waitForVisible(SELECTORS.result, 20 * 1000);
   markers.stop('Search');
 
-  console.log(`First result text: ${await result.getText()}`);
+  console.log('First result was visible.');
   await driver.takeScreenshot();
 }
 

@@ -6,7 +6,8 @@ import { driver, markers, credentials, downloads, transaction, test } from 'thou
 const IMPLICIT_TIMEOUT_MS = 5 * 1000;
 const PAGE_READY_TIMEOUT_MS = 30 * 1000;
 const AUTH_API_TIMEOUT_MS = 30 * 1000;
-const AUTH_URL = 'https://api.example.com/oauth/token';
+const AUTH_STEP_NAME = 'Fetch Authentication Credentials';
+const AUTH_PATH = '/oauth/token';
 const CLIENT_ID = credentials.get('API Client ID');
 const CLIENT_SECRET = credentials.get('API Client Secret');
 const SCOPE = 'read:status';
@@ -19,9 +20,10 @@ async function runScript() {
 
     const settings = test.getSettings();
     const targetUrl = settings.url;
+    const authUrl = buildUrlFromTestSettings(AUTH_PATH, targetUrl);
 
     //Fetch OAuth 2.0 client credentials with the Node fetch API
-    const authenticationCredentials = await fetchAuthenticationCredentials();
+    const authenticationCredentials = await fetchAuthenticationCredentials(authUrl);
 
     //Load the Page
     markers.start('Page Load');
@@ -34,7 +36,6 @@ async function runScript() {
     if (accessToken) {
       console.log('OAuth access token fetched successfully.');
     }
-    console.log(`Authentication credential fields returned: ${Object.keys(authenticationCredentials).join(', ')}`);
 
     //Take a screenshot
     await driver.takeScreenshot();
@@ -55,7 +56,7 @@ async function configureDriver() {
 
 /* helper function to fetch OAuth 2.0 client credentials before the browser flow.
 Store secrets in the ThousandEyes credential store; do not put them directly in this file. */
-async function fetchAuthenticationCredentials() {
+async function fetchAuthenticationCredentials(authUrl) {
   const body = new URLSearchParams({
     grant_type: 'client_credentials',
     client_id: CLIENT_ID,
@@ -63,10 +64,10 @@ async function fetchAuthenticationCredentials() {
     scope: SCOPE,
   });
 
-  markers.start('Fetch Authentication Credentials');
+  markers.start(AUTH_STEP_NAME);
   let response;
   try {
-    response = await fetchWithTimeout(AUTH_URL, {
+    response = await fetchWithTimeout(authUrl, {
       method: 'POST',
       headers: {
         'content-type': 'application/x-www-form-urlencoded',
@@ -74,23 +75,22 @@ async function fetchAuthenticationCredentials() {
       body,
     }, AUTH_API_TIMEOUT_MS);
   } finally {
-    markers.stop('Fetch Authentication Credentials');
+    markers.stop(AUTH_STEP_NAME);
   }
 
-  const responseText = await response.text();
   if (!response.ok) {
-    throw new Error(`Authentication API failed: ${response.status} ${response.statusText}\n${responseText}`);
+    throw new Error(`${AUTH_STEP_NAME} failed: ${response.status} ${response.statusText}`);
   }
 
   try {
-    const authenticationCredentials = JSON.parse(responseText);
+    const authenticationCredentials = await response.json();
     if (!authenticationCredentials.access_token) {
-      throw new Error('OAuth response did not include access_token');
+      throw new Error(`${AUTH_STEP_NAME} response did not include access_token`);
     }
 
     return authenticationCredentials;
   } catch (error) {
-    throw new Error(`Authentication API response could not be used: ${error.message}`);
+    throw new Error(`${AUTH_STEP_NAME} response could not be used: ${response.status} ${response.statusText}`);
   }
 }
 
@@ -99,9 +99,14 @@ async function fetchWithTimeout(url, options, timeoutMs) {
   return Promise.race([
     fetch(url, options),
     new Promise((resolve, reject) => {
-      setTimeout(() => reject(new Error(`Timed out fetching ${url}`)), timeoutMs);
+      setTimeout(() => reject(new Error('Timed out during API request')), timeoutMs);
     }),
   ]);
+}
+
+function buildUrlFromTestSettings(path, settingsUrl) {
+  const configuredUrl = new URL(settingsUrl);
+  return new URL(path, `${configuredUrl.origin}/`).toString();
 }
 
 //helper function for a generic signal that the page has been loaded

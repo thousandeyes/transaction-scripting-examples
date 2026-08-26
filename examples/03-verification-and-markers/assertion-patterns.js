@@ -47,7 +47,7 @@ async function assertElementTextContains(locator, expected) {
   const text = await element.getText();
 
   if (!text.includes(expected)) {
-    throw new Error(`Expected text to include "${expected}", got: ${text}`);
+    throw new Error(`Expected text was not present. textLength=${text.length}`);
   }
 }
 

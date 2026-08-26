@@ -33,7 +33,7 @@ async function runScript() {
 
   const successText = await success.getText();
   if (!successText.toLowerCase().includes(EXPECTED_SUCCESS_TEXT.toLowerCase())) {
-    throw new Error(`Expected upload confirmation to include "${EXPECTED_SUCCESS_TEXT}", got: ${successText}`);
+    throw new Error(`Expected upload confirmation was not present. textLength=${successText.length}`);
   }
 
   await driver.takeScreenshot();

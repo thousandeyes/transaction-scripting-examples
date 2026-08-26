@@ -10,7 +10,7 @@ Examples are grouped by the problem they teach. Each script is designed to be co
 - [03-verification-and-markers](03-verification-and-markers/) - markers, assertions, screenshots, failure diagnostics.
 - [04-files-downloads-uploads](04-files-downloads-uploads/) - downloads, filename/content/hash checks, upload file generation.
 - [05-auth-and-mfa](05-auth-and-mfa/) - TOTP, login MFA, math captcha.
-- [06-api-and-hybrid-flows](06-api-and-hybrid-flows/) - API authentication and authenticated API setup before browser flows.
+- [06-api-and-hybrid-flows](06-api-and-hybrid-flows/) - API authentication, different OAuth token URLs, and authenticated API setup before browser flows.
 - [07-browser-edge-cases](07-browser-edge-cases/) - iframes, shadow DOM, alerts, tabs, hover, state, popups.
 
 ## How to choose an example

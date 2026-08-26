@@ -1,9 +1,10 @@
 import { By, until } from 'selenium-webdriver';
-import { driver, markers, test } from 'thousandeyes';
+import { credentials, driver, markers, test } from 'thousandeyes';
 
 const IMPLICIT_TIMEOUT_MS = 5 * 1000;
-const COOKIE_NAME = '';
-const COOKIE_VALUE = '';
+//Store cookie values in the ThousandEyes Credentials Repository.
+const COOKIE_NAME = 'Example Preference Cookie';
+const COOKIE_VALUE_CREDENTIAL_NAME = 'Example Preference Cookie Value';
 const CONSENT_SELECTOR = By.css('#onetrust-accept-btn-handler');
 const MODAL_CLOSE_SELECTOR = By.css('[data-testid="modal-close"]');
 const READY_SELECTOR = By.css('body');
@@ -19,7 +20,7 @@ async function runScript() {
 
   markers.start('Prepare state');
   await setStorage('syntheticTest', 'true');
-  await addCookieIfConfigured(COOKIE_NAME, COOKIE_VALUE);
+  await addCookieIfConfigured(COOKIE_NAME, COOKIE_VALUE_CREDENTIAL_NAME);
   markers.stop('Prepare state');
 
   await dismissIfPresent(CONSENT_SELECTOR, 'consent banner');
@@ -43,10 +44,12 @@ async function setStorage(key, value) {
   );
 }
 
-async function addCookieIfConfigured(name, value) {
-  if (!name || !value) {
+async function addCookieIfConfigured(name, credentialName) {
+  if (!name || !credentialName) {
     return;
   }
+
+  const value = credentials.get(credentialName);
 
   await driver.manage().addCookie({
     name,

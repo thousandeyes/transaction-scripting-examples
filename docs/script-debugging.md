@@ -1,19 +1,27 @@
 # Script Debugging
 
-Use this guide when modifying a transaction script so failures produce enough evidence to explain what happened without rerunning immediately.
+Use this guide when modifying a transaction script so failures produce enough evidence to explain what happened without rerunning immediately. For the repository logging policy and rationale, read [Logging and reporting](logging-and-reporting.md).
 
 ## Evidence checklist
 
 - Screenshot after page load.
 - Screenshot after login or each major business step.
 - Marker around each measured step.
-- Current URL and title in failure logs.
-- Short page-source excerpt in failure logs when a selector is missing.
-- Console logs only for values that are safe to expose.
+- Current step name in failure logs.
+- Navigation metadata such as ready state, same-origin check, query/hash presence, path depth, and title length.
+- Element metadata such as located count, displayed state, enabled state, and element size.
+- Browser console severity counts only.
+- Do not log page source, element text, full URLs, titles, cookies, storage, headers, response bodies, or console message bodies.
 
 ## Diagnostic wrapper
 
 ```js
+let currentStep = 'Starting transaction';
+
+function setCurrentStep(stepName) {
+  currentStep = stepName;
+}
+
 try {
   await runTransaction();
 } catch (error) {
@@ -22,18 +30,63 @@ try {
 }
 
 async function captureDiagnostics(error) {
-  console.log(`Failure: ${error.message}`);
+  console.log(`Transaction failed during step: ${currentStep}`);
+  console.log(`Failure type: ${error.name || 'Error'}`);
 
   try {
-    console.log(`Current URL: ${await driver.getCurrentUrl()}`);
-    console.log(`Page title: ${await driver.getTitle()}`);
-    await driver.takeScreenshot();
-
-    const source = await driver.getPageSource();
-    console.log(source.slice(0, 2000));
+    await logNavigationState();
+    await logElementState('ready selector', READY_SELECTOR);
+    await logConsoleSummary();
   } catch (diagnosticError) {
-    console.log(`Unable to capture diagnostics: ${diagnosticError.message}`);
+    console.log(`Unable to capture diagnostics: ${diagnosticError.name || 'Error'}`);
   }
+}
+
+async function logNavigationState() {
+  const settings = test.getSettings();
+  const state = await driver.executeScript(`
+    const configuredUrl = new URL(arguments[0]);
+    return {
+      readyState: document.readyState,
+      sameOriginAsConfiguredUrl: window.location.origin === configuredUrl.origin,
+      hasQueryString: window.location.search.length > 0,
+      hasHash: window.location.hash.length > 0,
+      pathDepth: window.location.pathname.split('/').filter(Boolean).length,
+      titleLength: document.title.length,
+      bodyPresent: Boolean(document.body),
+    };
+  `, settings.url);
+
+  console.log(`Navigation state: ${JSON.stringify(state)}`);
+}
+
+async function logElementState(label, locator) {
+  const elements = await driver.findElements(locator);
+  console.log(`${label}: located=${elements.length > 0}, count=${elements.length}`);
+
+  if (elements.length === 0) {
+    return;
+  }
+
+  const element = elements[0];
+  const displayed = await element.isDisplayed();
+  const enabled = await element.isEnabled();
+  const rect = await element.getRect();
+
+  console.log(
+    `${label}: displayed=${displayed}, enabled=${enabled}, rect=${Math.round(rect.width)}x${Math.round(rect.height)}`
+  );
+}
+
+async function logConsoleSummary() {
+  const logs = await driver.manage().logs().get('browser');
+  const counts = logs.reduce((summary, entry) => {
+    const level = String(entry.level?.name || entry.level || 'UNKNOWN');
+    summary[level] = (summary[level] || 0) + 1;
+    return summary;
+  }, {});
+
+  console.log(`Browser console summary: ${JSON.stringify(counts)}`);
 }
 ```
 
@@ -46,7 +99,7 @@ const confirmation = await waitForVisible(By.css('[data-testid="confirmation"]')
 const text = await confirmation.getText();
 
 if (!text.includes('Submitted')) {
-  throw new Error(`Expected confirmation text to include "Submitted", got: ${text}`);
+  throw new Error(`Expected confirmation text was not present. textLength=${text.length}`);
 }
 ```
 

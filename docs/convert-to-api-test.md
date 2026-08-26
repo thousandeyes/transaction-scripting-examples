@@ -21,14 +21,15 @@ Not every browser flow should stay a browser flow. Some checks are faster, clear
 Use an authenticated API setup step only when it affects the browser journey. Standalone HTTP checks should become ThousandEyes API tests instead.
 
 ```js
-const API_URL = 'https://api.example.com/me';
+const API_PATH = '/me';
 const API_TOKEN = credentials.get('API Bearer Token');
 
 const settings = test.getSettings();
 const targetUrl = settings.url;
+const apiUrl = buildUrlFromTestSettings(API_PATH, targetUrl);
 
 markers.start('Authenticated API Check');
-const response = await fetch(API_URL, {
+const response = await fetch(apiUrl, {
   headers: {
     authorization: `Bearer ${API_TOKEN}`,
   },
@@ -43,6 +44,11 @@ markers.start('Browser flow');
 await driver.get(targetUrl);
 await waitForVisible(By.css('[data-testid="dashboard"]'));
 markers.stop('Browser flow');
+
+function buildUrlFromTestSettings(path, settingsUrl) {
+  const configuredUrl = new URL(settingsUrl);
+  return new URL(path, `${configuredUrl.origin}/`).toString();
+}
 ```
 
 ## What belongs in this repo

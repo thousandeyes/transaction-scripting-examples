@@ -40,7 +40,7 @@ async function runScript() {
   const successText = await success.getText();
 
   if (!successText.includes(EXPECTED_SUCCESS_TEXT)) {
-    throw new Error(`Expected success text to include "${EXPECTED_SUCCESS_TEXT}", got: ${successText}`);
+    throw new Error(`Expected success text was not present. textLength=${successText.length}`);
   }
 
   await driver.takeScreenshot();

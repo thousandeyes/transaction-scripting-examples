@@ -9,10 +9,10 @@ const API_TIMEOUT_MS = 30 * 1000;
 
 //Choose one authentication mode: oauth-client-credentials, bearer-token, basic-auth, or api-key-header
 const AUTHENTICATION_MODE = 'oauth-client-credentials';
-const AUTHENTICATED_API_URL = 'https://api.example.com/me';
+const AUTHENTICATED_API_PATH = '/me';
 const EXPECTED_API_STATUS = 200;
 
-const OAUTH_TOKEN_URL = 'https://api.example.com/oauth/token';
+const OAUTH_TOKEN_PATH = '/oauth/token';
 const OAUTH_CLIENT_ID_CREDENTIAL_NAME = 'OAuth Client ID';
 const OAUTH_CLIENT_SECRET_CREDENTIAL_NAME = 'OAuth Client Secret';
 const OAUTH_SCOPE = 'read:profile';
@@ -25,10 +25,6 @@ const BASIC_AUTH_PASSWORD_CREDENTIAL_NAME = 'API Password';
 const API_KEY_CREDENTIAL_NAME = 'API Key';
 const API_KEY_HEADER_NAME = 'x-api-key';
 
-//Set this only when your browser app intentionally reads an API token from storage.
-const BROWSER_TOKEN_STORAGE_KEY = '';
-const BROWSER_TOKEN_STORAGE_TYPE = 'localStorage';
-
 runScript();
 
 async function runScript() {
@@ -37,20 +33,20 @@ async function runScript() {
 
     const settings = test.getSettings();
     const targetUrl = settings.url;
+    const authenticatedApiUrl = buildUrlFromTestSettings(AUTHENTICATED_API_PATH, targetUrl);
+    const oauthTokenUrl = buildUrlFromTestSettings(OAUTH_TOKEN_PATH, targetUrl);
 
     //Authenticate with the API before the browser flow
-    const authentication = await authenticateWithApi(AUTHENTICATION_MODE);
+    const authentication = await authenticateWithApi(AUTHENTICATION_MODE, oauthTokenUrl);
 
     //Use the authenticated API call to verify account/session readiness before loading the browser
-    await runAuthenticatedApiCheck(authentication);
+    await runAuthenticatedApiCheck(authentication, authenticatedApiUrl);
 
     //Load the Page
     markers.start('Page Load');
     await driver.get(targetUrl);
     await waitForPageLoaded(PAGE_READY_TIMEOUT_MS);
     markers.stop('Page Load');
-
-    await applyBrowserTokenIfConfigured(authentication);
 
     //Take a screenshot
     await driver.takeScreenshot();
@@ -69,10 +65,10 @@ async function configureDriver() {
   });
 }
 
-async function authenticateWithApi(mode) {
+async function authenticateWithApi(mode, oauthTokenUrl) {
   switch (mode) {
     case 'oauth-client-credentials':
-      return fetchOAuthClientCredentials();
+      return fetchOAuthClientCredentials(oauthTokenUrl);
     case 'bearer-token':
       return buildBearerTokenAuthentication();
     case 'basic-auth':
@@ -86,7 +82,7 @@ async function authenticateWithApi(mode) {
 
 /* OAuth 2.0 client credentials is common for service-to-service enterprise APIs.
 The API returns a short-lived access token used as a Bearer token. */
-async function fetchOAuthClientCredentials() {
+async function fetchOAuthClientCredentials(oauthTokenUrl) {
   const body = new URLSearchParams({
     grant_type: 'client_credentials',
     client_id: credentials.get(OAUTH_CLIENT_ID_CREDENTIAL_NAME),
@@ -97,7 +93,7 @@ async function fetchOAuthClientCredentials() {
   markers.start('OAuth Client Credentials');
   let response;
   try {
-    response = await fetchWithTimeout(OAUTH_TOKEN_URL, {
+    response = await fetchWithTimeout(oauthTokenUrl, {
       method: 'POST',
       headers: {
         'content-type': 'application/x-www-form-urlencoded',
@@ -120,7 +116,6 @@ async function fetchOAuthClientCredentials() {
     headers: {
       authorization: `Bearer ${tokenResponse.access_token}`,
     },
-    browserToken: tokenResponse.access_token,
   };
 }
 
@@ -134,7 +129,6 @@ async function buildBearerTokenAuthentication() {
     headers: {
       authorization: `Bearer ${token}`,
     },
-    browserToken: token,
   };
 }
 
@@ -164,11 +158,11 @@ async function buildApiKeyHeaderAuthentication() {
   };
 }
 
-async function runAuthenticatedApiCheck(authentication) {
+async function runAuthenticatedApiCheck(authentication, authenticatedApiUrl) {
   markers.start('Authenticated API Check');
   let response;
   try {
-    response = await fetchWithTimeout(AUTHENTICATED_API_URL, {
+    response = await fetchWithTimeout(authenticatedApiUrl, {
       method: 'GET',
       headers: authentication.headers,
     }, API_TIMEOUT_MS);
@@ -177,23 +171,6 @@ async function runAuthenticatedApiCheck(authentication) {
   }
 
   assertResponseStatus(response, EXPECTED_API_STATUS, `${authentication.label} API check`);
-}
-
-async function applyBrowserTokenIfConfigured(authentication) {
-  if (!BROWSER_TOKEN_STORAGE_KEY || !authentication.browserToken) {
-    return;
-  }
-
-  markers.start('Apply Browser Auth State');
-  await driver.executeScript(
-    `window[arguments[0]].setItem(arguments[1], arguments[2]);`,
-    BROWSER_TOKEN_STORAGE_TYPE,
-    BROWSER_TOKEN_STORAGE_KEY,
-    authentication.browserToken
-  );
-  await driver.navigate().refresh();
-  await waitForPageLoaded(PAGE_READY_TIMEOUT_MS);
-  markers.stop('Apply Browser Auth State');
 }
 
 function assertResponseStatus(response, expectedStatus, label) {
@@ -207,9 +184,14 @@ async function fetchWithTimeout(url, options, timeoutMs) {
   return Promise.race([
     fetch(url, options),
     new Promise((resolve, reject) => {
-      setTimeout(() => reject(new Error(`Timed out fetching ${url}`)), timeoutMs);
+      setTimeout(() => reject(new Error('Timed out during API request')), timeoutMs);
     }),
   ]);
+}
+
+function buildUrlFromTestSettings(path, settingsUrl) {
+  const configuredUrl = new URL(settingsUrl);
+  return new URL(path, `${configuredUrl.origin}/`).toString();
 }
 
 //helper function for a generic signal that the page has been loaded

@@ -37,7 +37,8 @@ async function runScript() {
     markers.start('Native alert');
     await driver.findElement(ALERT_BUTTON_SELECTOR).click();
     const alert = await driver.wait(until.alertIsPresent(), 10 * 1000);
-    console.log(`Alert text: ${await alert.getText()}`);
+    const alertText = await alert.getText();
+    console.log(`Alert was present. textLength=${alertText.length}`);
     await alert.accept();
     markers.stop('Native alert');
   }

@@ -56,21 +56,25 @@ await checkout.findElement(By.css('button[type="submit"]')).click();
 
 Selectors do not cross iframe or shadow-root boundaries automatically.
 
+When a selected field receives usernames, emails, passwords, account IDs, card numbers, or similar values, read those values from the ThousandEyes Credentials Repository.
+
 For iframes:
 
 ```js
+const cardNumber = credentials.get('Test Card Number');
 const frame = await driver.findElement(By.css('iframe[name="payment"]'));
 await driver.switchTo().frame(frame);
-await driver.findElement(By.css('#card-number')).sendKeys('4111111111111111');
+await driver.findElement(By.css('#card-number')).sendKeys(cardNumber);
 await driver.switchTo().defaultContent();
 ```
 
 For open shadow roots:
 
 ```js
+const username = credentials.get('App Username');
 const host = await driver.findElement(By.css('custom-login'));
 const root = await driver.executeScript('return arguments[0].shadowRoot;', host);
-await root.findElement(By.css('input[name="username"]')).sendKeys('user@example.com');
+await root.findElement(By.css('input[name="username"]')).sendKeys(username);
 ```
 
 ## Maintenance tips

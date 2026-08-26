@@ -11,6 +11,7 @@ Note: this project contains example code and is not covered under ThousandEyes s
 - New to transaction scripting: read [Getting started](docs/getting-started.md), then run through [00-basics](examples/00-basics/).
 - Modifying scripts for flaky browser flows: start with [Selector strategy](docs/selector-strategy.md) and [Script debugging](docs/script-debugging.md).
 - Handling passwords, TOTP, MFA, or secrets: read [Credentials and secrets](docs/credentials-and-secrets.md).
+- Adding logs, errors, or screenshots: read [Logging and reporting](docs/logging-and-reporting.md).
 - Deciding whether a browser flow should become an API or hybrid test: read [Convert to API test](docs/convert-to-api-test.md).
 
 ## Repository map
@@ -18,6 +19,7 @@ Note: this project contains example code and is not covered under ThousandEyes s
 ```text
 docs/
   getting-started.md
+  logging-and-reporting.md
   selector-strategy.md
   script-debugging.md
   credentials-and-secrets.md
@@ -56,9 +58,10 @@ templates/
 - Use `test.getSettings()` for the transaction test URL saved by ThousandEyes.
 - Keep other user-defined values as constants near the top of the script so they are easy to review and edit.
 - Use `credentials.get()` for passwords, API tokens, client secrets, TOTP seeds, and other secrets.
+- Log diagnostic metadata instead of page source, raw page text, full URLs, response bodies, or secret-bearing values.
 - Put markers around business steps: page load, login, search, checkout, authenticated API checks, download, and logout.
 - Prefer explicit waits and retry helpers over large fixed sleeps.
-- Capture screenshots at important checkpoints and diagnostics on failure.
+- Capture screenshots at important checkpoints only when the page state is appropriate for result collection.
 - Keep examples copyable. Keep local selectors, URLs, and helper functions grouped where future editors can find them quickly.
 
 ## Additional Resources
