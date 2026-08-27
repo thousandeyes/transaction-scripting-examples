@@ -1,26 +1,29 @@
 import { By, until } from 'selenium-webdriver';
-import { driver, markers, credentials, downloads, transaction, test } from 'thousandeyes';
+import { driver, markers, test } from 'thousandeyes';
 
-//Constants defined upfront used later in the script
+// This section contains the customizable values. Add other customizable elements here for easy editing.
 const IMPLICIT_TIMEOUT_MS = 5 * 1000;
 const PAGE_READY_TIMEOUT_MS = 30 * 1000;
+
+let currentStep = 'Starting transaction';
 
 runScript();
 
 async function runScript() {
   try {
+    setCurrentStep('Configure driver');
     await configureDriver();
 
     const settings = test.getSettings();
     const targetUrl = settings.url;
 
-    //Load the Page
+    setCurrentStep('Load configured test URL');
     markers.start('Page Load');
     await driver.get(targetUrl);
     await waitForPageLoaded(PAGE_READY_TIMEOUT_MS);
     markers.stop('Page Load');
 
-    //Take a screenshot
+    setCurrentStep('Capture evidence screenshot');
     await driver.takeScreenshot();
   } catch (error) {
     await captureDiagnostics(error);
@@ -37,6 +40,10 @@ async function configureDriver() {
   });
 }
 
+function setCurrentStep(stepName) {
+  currentStep = stepName;
+}
+
 //helper function for a generic signal that the page has been loaded
 async function waitForPageLoaded(timeoutMs) {
   await driver.wait(async () => {
@@ -48,15 +55,13 @@ async function waitForPageLoaded(timeoutMs) {
   await driver.wait(until.elementIsVisible(body), timeoutMs);
 }
 
-//Ensure console log test settings option is turned on to use the following helper function
 async function captureDiagnostics(error) {
-  console.log(`Transaction failed: ${error.message}`);
+  console.log(`Transaction failed during step: ${currentStep}`);
+  console.log(`Failure type: ${error.name || 'Error'}`);
 
   try {
-    console.log(`Current URL: ${await driver.getCurrentUrl()}`);
-    console.log(`Page title: ${await driver.getTitle()}`);
     await driver.takeScreenshot();
   } catch (diagnosticError) {
-    console.log(`Unable to capture diagnostics: ${diagnosticError.message}`);
+    console.log(`Unable to capture diagnostics: ${diagnosticError.name || 'Error'}`);
   }
 }

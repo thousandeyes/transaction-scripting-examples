@@ -1,0 +1,7 @@
+{
+  "name": "transaction-scripting-repo-refresh",
+  "private": true,
+  "scripts": {
+    "validate": "node scripts/validate-repository.mjs"
+  }
+}

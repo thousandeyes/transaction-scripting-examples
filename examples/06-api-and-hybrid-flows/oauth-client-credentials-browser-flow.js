@@ -5,12 +5,15 @@ import { credentials, driver, markers, test } from 'thousandeyes';
 // This section contains the customizable values. Add other customizable elements here for easy editing.
 const IMPLICIT_TIMEOUT_MS = 5 * 1000;
 const PAGE_READY_TIMEOUT_MS = 30 * 1000;
-const AUTH_API_TIMEOUT_MS = 30 * 1000;
-const AUTH_STEP_NAME = 'Fetch Authentication Credentials';
-const AUTH_PATH = '/oauth/token';
-const CLIENT_ID_CREDENTIAL_NAME = 'API Client ID';
-const CLIENT_SECRET_CREDENTIAL_NAME = 'API Client Secret';
-const SCOPE = 'read:status';
+const API_TIMEOUT_MS = 30 * 1000;
+
+const AUTHENTICATED_API_PATH = '/me';
+const OAUTH_TOKEN_PATH = '/oauth/token';
+const EXPECTED_API_STATUS = 200;
+
+const OAUTH_CLIENT_ID_CREDENTIAL_NAME = 'OAuth Client ID';
+const OAUTH_CLIENT_SECRET_CREDENTIAL_NAME = 'OAuth Client Secret';
+const OAUTH_SCOPE = 'read:profile';
 
 let currentStep = 'Starting transaction';
 
@@ -23,30 +26,19 @@ async function runScript() {
 
     const settings = test.getSettings();
     const targetUrl = settings.url;
-    const authUrl = buildUrlFromTestSettings(AUTH_PATH, targetUrl);
-
-    setCurrentStep('Read OAuth credentials');
-    const clientId = credentials.get(CLIENT_ID_CREDENTIAL_NAME);
-    const clientSecret = credentials.get(CLIENT_SECRET_CREDENTIAL_NAME);
+    const authenticatedApiUrl = buildUrlFromTestSettings(AUTHENTICATED_API_PATH, targetUrl);
+    const oauthTokenUrl = buildUrlFromTestSettings(OAUTH_TOKEN_PATH, targetUrl);
 
     setCurrentStep('Fetch OAuth client credentials');
-    const authenticationCredentials = await fetchAuthenticationCredentials(
-      authUrl,
-      clientId,
-      clientSecret
-    );
+    const accessToken = await fetchOAuthClientCredentials(oauthTokenUrl);
+    setCurrentStep('Run authenticated API check');
+    await runAuthenticatedApiCheck(accessToken, authenticatedApiUrl);
 
     setCurrentStep('Load configured test URL');
     markers.start('Page Load');
     await driver.get(targetUrl);
     await waitForPageLoaded(PAGE_READY_TIMEOUT_MS);
     markers.stop('Page Load');
-
-    //Use accessToken here if your application needs a bearer token, cookie, or session value.
-    const accessToken = authenticationCredentials.access_token;
-    if (accessToken) {
-      console.log('OAuth access token fetched successfully.');
-    }
 
     setCurrentStep('Capture evidence screenshot');
     await driver.takeScreenshot();
@@ -56,9 +48,6 @@ async function runScript() {
   }
 }
 
-/* helper function to use implicit timeouts.
-Every step will wait for the amount of time defined in the implicit time out
-before declaring an element cannot be found */
 async function configureDriver() {
   await driver.manage().setTimeouts({
     implicit: IMPLICIT_TIMEOUT_MS,
@@ -69,47 +58,63 @@ function setCurrentStep(stepName) {
   currentStep = stepName;
 }
 
-/* helper function to fetch OAuth 2.0 client credentials before the browser flow.
-Store secrets in the ThousandEyes credential store; do not put them directly in this file. */
-async function fetchAuthenticationCredentials(authUrl, clientId, clientSecret) {
+/* OAuth 2.0 client credentials is common for service-to-service enterprise APIs.
+The API returns a short-lived access token used as a Bearer token. */
+async function fetchOAuthClientCredentials(oauthTokenUrl) {
   const body = new URLSearchParams({
     grant_type: 'client_credentials',
-    client_id: clientId,
-    client_secret: clientSecret,
-    scope: SCOPE,
+    client_id: credentials.get(OAUTH_CLIENT_ID_CREDENTIAL_NAME),
+    client_secret: credentials.get(OAUTH_CLIENT_SECRET_CREDENTIAL_NAME),
+    scope: OAUTH_SCOPE,
   });
 
-  markers.start(AUTH_STEP_NAME);
+  markers.start('OAuth Client Credentials');
   let response;
   try {
-    response = await fetchWithTimeout(authUrl, {
+    response = await fetchWithTimeout(oauthTokenUrl, {
       method: 'POST',
       headers: {
         'content-type': 'application/x-www-form-urlencoded',
       },
       body,
-    }, AUTH_API_TIMEOUT_MS);
+    }, API_TIMEOUT_MS);
   } finally {
-    markers.stop(AUTH_STEP_NAME);
+    markers.stop('OAuth Client Credentials');
   }
 
-  if (!response.ok) {
-    throw new Error(`${AUTH_STEP_NAME} failed: ${response.status} ${response.statusText}`);
+  assertResponseStatus(response, 200, 'OAuth token request');
+
+  const tokenResponse = await response.json();
+  if (!tokenResponse.access_token) {
+    throw new Error('OAuth token response did not include access_token');
   }
 
+  return tokenResponse.access_token;
+}
+
+async function runAuthenticatedApiCheck(accessToken, authenticatedApiUrl) {
+  markers.start('Authenticated API Check');
+  let response;
   try {
-    const authenticationCredentials = await response.json();
-    if (!authenticationCredentials.access_token) {
-      throw new Error(`${AUTH_STEP_NAME} response did not include access_token`);
-    }
+    response = await fetchWithTimeout(authenticatedApiUrl, {
+      method: 'GET',
+      headers: {
+        authorization: `Bearer ${accessToken}`,
+      },
+    }, API_TIMEOUT_MS);
+  } finally {
+    markers.stop('Authenticated API Check');
+  }
 
-    return authenticationCredentials;
-  } catch (error) {
-    throw new Error(`${AUTH_STEP_NAME} response could not be used: ${response.status} ${response.statusText}`);
+  assertResponseStatus(response, EXPECTED_API_STATUS, 'OAuth authenticated API check');
+}
+
+function assertResponseStatus(response, expectedStatus, label) {
+  if (response.status !== expectedStatus) {
+    throw new Error(`${label} failed: ${response.status} ${response.statusText}`);
   }
 }
 
-//helper function to apply a timeout to Node fetch API calls
 async function fetchWithTimeout(url, options, timeoutMs) {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
@@ -135,7 +140,6 @@ function buildUrlFromTestSettings(path, settingsUrl) {
   return new URL(path, `${configuredUrl.origin}/`).toString();
 }
 
-//helper function for a generic signal that the page has been loaded
 async function waitForPageLoaded(timeoutMs) {
   await driver.wait(async () => {
     const readyState = await driver.executeScript('return document.readyState');

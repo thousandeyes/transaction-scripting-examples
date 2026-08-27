@@ -5,12 +5,12 @@ import { credentials, driver, markers, test } from 'thousandeyes';
 // This section contains the customizable values. Add other customizable elements here for easy editing.
 const IMPLICIT_TIMEOUT_MS = 5 * 1000;
 const PAGE_READY_TIMEOUT_MS = 30 * 1000;
-const AUTH_API_TIMEOUT_MS = 30 * 1000;
-const AUTH_STEP_NAME = 'Fetch Authentication Credentials';
-const AUTH_PATH = '/oauth/token';
-const CLIENT_ID_CREDENTIAL_NAME = 'API Client ID';
-const CLIENT_SECRET_CREDENTIAL_NAME = 'API Client Secret';
-const SCOPE = 'read:status';
+const API_TIMEOUT_MS = 30 * 1000;
+
+const AUTHENTICATED_API_PATH = '/me';
+const EXPECTED_API_STATUS = 200;
+const BASIC_AUTH_USERNAME_CREDENTIAL_NAME = 'API Username';
+const BASIC_AUTH_PASSWORD_CREDENTIAL_NAME = 'API Password';
 
 let currentStep = 'Starting transaction';
 
@@ -23,30 +23,20 @@ async function runScript() {
 
     const settings = test.getSettings();
     const targetUrl = settings.url;
-    const authUrl = buildUrlFromTestSettings(AUTH_PATH, targetUrl);
+    const authenticatedApiUrl = buildUrlFromTestSettings(AUTHENTICATED_API_PATH, targetUrl);
 
-    setCurrentStep('Read OAuth credentials');
-    const clientId = credentials.get(CLIENT_ID_CREDENTIAL_NAME);
-    const clientSecret = credentials.get(CLIENT_SECRET_CREDENTIAL_NAME);
-
-    setCurrentStep('Fetch OAuth client credentials');
-    const authenticationCredentials = await fetchAuthenticationCredentials(
-      authUrl,
-      clientId,
-      clientSecret
-    );
+    setCurrentStep('Read Basic authentication credentials');
+    const username = credentials.get(BASIC_AUTH_USERNAME_CREDENTIAL_NAME);
+    const password = credentials.get(BASIC_AUTH_PASSWORD_CREDENTIAL_NAME);
+    const basicAuth = Buffer.from(`${username}:${password}`).toString('base64');
+    setCurrentStep('Run authenticated API check');
+    await runAuthenticatedApiCheck(basicAuth, authenticatedApiUrl);
 
     setCurrentStep('Load configured test URL');
     markers.start('Page Load');
     await driver.get(targetUrl);
     await waitForPageLoaded(PAGE_READY_TIMEOUT_MS);
     markers.stop('Page Load');
-
-    //Use accessToken here if your application needs a bearer token, cookie, or session value.
-    const accessToken = authenticationCredentials.access_token;
-    if (accessToken) {
-      console.log('OAuth access token fetched successfully.');
-    }
 
     setCurrentStep('Capture evidence screenshot');
     await driver.takeScreenshot();
@@ -56,9 +46,6 @@ async function runScript() {
   }
 }
 
-/* helper function to use implicit timeouts.
-Every step will wait for the amount of time defined in the implicit time out
-before declaring an element cannot be found */
 async function configureDriver() {
   await driver.manage().setTimeouts({
     implicit: IMPLICIT_TIMEOUT_MS,
@@ -69,47 +56,31 @@ function setCurrentStep(stepName) {
   currentStep = stepName;
 }
 
-/* helper function to fetch OAuth 2.0 client credentials before the browser flow.
-Store secrets in the ThousandEyes credential store; do not put them directly in this file. */
-async function fetchAuthenticationCredentials(authUrl, clientId, clientSecret) {
-  const body = new URLSearchParams({
-    grant_type: 'client_credentials',
-    client_id: clientId,
-    client_secret: clientSecret,
-    scope: SCOPE,
-  });
-
-  markers.start(AUTH_STEP_NAME);
+/* Basic authentication is common for legacy APIs and simple internal services.
+Store both values in the ThousandEyes credential store. */
+async function runAuthenticatedApiCheck(basicAuth, authenticatedApiUrl) {
+  markers.start('Basic Authentication API Check');
   let response;
   try {
-    response = await fetchWithTimeout(authUrl, {
-      method: 'POST',
+    response = await fetchWithTimeout(authenticatedApiUrl, {
+      method: 'GET',
       headers: {
-        'content-type': 'application/x-www-form-urlencoded',
+        authorization: `Basic ${basicAuth}`,
       },
-      body,
-    }, AUTH_API_TIMEOUT_MS);
+    }, API_TIMEOUT_MS);
   } finally {
-    markers.stop(AUTH_STEP_NAME);
+    markers.stop('Basic Authentication API Check');
   }
 
-  if (!response.ok) {
-    throw new Error(`${AUTH_STEP_NAME} failed: ${response.status} ${response.statusText}`);
-  }
+  assertResponseStatus(response, EXPECTED_API_STATUS, 'Basic authentication API check');
+}
 
-  try {
-    const authenticationCredentials = await response.json();
-    if (!authenticationCredentials.access_token) {
-      throw new Error(`${AUTH_STEP_NAME} response did not include access_token`);
-    }
-
-    return authenticationCredentials;
-  } catch (error) {
-    throw new Error(`${AUTH_STEP_NAME} response could not be used: ${response.status} ${response.statusText}`);
+function assertResponseStatus(response, expectedStatus, label) {
+  if (response.status !== expectedStatus) {
+    throw new Error(`${label} failed: ${response.status} ${response.statusText}`);
   }
 }
 
-//helper function to apply a timeout to Node fetch API calls
 async function fetchWithTimeout(url, options, timeoutMs) {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
@@ -135,7 +106,6 @@ function buildUrlFromTestSettings(path, settingsUrl) {
   return new URL(path, `${configuredUrl.origin}/`).toString();
 }
 
-//helper function for a generic signal that the page has been loaded
 async function waitForPageLoaded(timeoutMs) {
   await driver.wait(async () => {
     const readyState = await driver.executeScript('return document.readyState');

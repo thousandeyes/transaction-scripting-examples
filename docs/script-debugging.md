@@ -115,3 +115,11 @@ Use markers for business steps:
 - `Logout`
 
 Avoid implementation-only marker names such as `Click`, `Find element`, or `Sleep`.
+
+## Bounded polling
+
+Use a retry loop only for transient action failures, such as a control that is present but briefly not clickable. Give the loop a deadline, cap each condition wait by the time remaining, and use a short named poll interval only between attempts. For page readiness, URL changes, or expected text, use a state-based explicit wait instead. See [retry-click-with-implicit-timeout.js](../examples/01-navigation-and-waits/retry-click-with-implicit-timeout.js) for the focused pattern and [reusable-wait-action-patterns.js](../examples/01-navigation-and-waits/reusable-wait-action-patterns.js) for a broader helper set.
+
+## Overall transaction timing
+
+By default, overall transaction timing begins when the script starts. If setup or authentication should be excluded from that measurement, call `await transaction.start()` immediately before the measured user journey. Keep `markers.start()` and `markers.stop()` around the business steps you want to inspect within that overall boundary. See [transaction-start-after-setup.js](../examples/03-verification-and-markers/transaction-start-after-setup.js).

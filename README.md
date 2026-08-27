@@ -38,6 +38,9 @@ examples/
 templates/
   transaction-template.js
   browser-plus-api-template.js
+
+scripts/
+  validate-repository.mjs
 ```
 
 ## Example categories
@@ -47,7 +50,7 @@ templates/
 | [00-basics](examples/00-basics/) | Hello-world page load, `test.getSettings()`, page-ready wait, screenshots. |
 | [01-navigation-and-waits](examples/01-navigation-and-waits/) | Replacing sleeps, waiting for URL/title/elements, retrying clicks. |
 | [02-forms-and-login](examples/02-forms-and-login/) | Typing, pressing Enter, dropdowns, submit flows, username/password login, SSO waits, logout cleanup. |
-| [03-verification-and-markers](examples/03-verification-and-markers/) | Markers, assertions, screenshots, and diagnostics on failure. |
+| [03-verification-and-markers](examples/03-verification-and-markers/) | Markers, transaction timing, assertions, screenshots, and diagnostics on failure. |
 | [04-files-downloads-uploads](examples/04-files-downloads-uploads/) | Waiting for downloads, validating file expectations, and generating upload files. |
 | [05-auth-and-mfa](examples/05-auth-and-mfa/) | TOTP, login MFA, and math captcha patterns. |
 | [06-api-and-hybrid-flows](examples/06-api-and-hybrid-flows/) | Browser flows that need API authentication or authenticated API setup before the browser journey. |
@@ -60,9 +63,13 @@ templates/
 - Use `credentials.get()` for passwords, API tokens, client secrets, TOTP seeds, and other secrets.
 - Log diagnostic metadata instead of page source, raw page text, full URLs, response bodies, or secret-bearing values.
 - Put markers around business steps: page load, login, search, checkout, authenticated API checks, download, and logout.
-- Prefer explicit waits and retry helpers over large fixed sleeps.
+- Prefer explicit waits and bounded retry helpers over fixed sleeps. If a retry loop needs a short polling interval, name it and keep the total timeout explicit.
 - Capture screenshots at important checkpoints only when the page state is appropriate for result collection.
 - Keep examples copyable. Keep local selectors, URLs, and helper functions grouped where future editors can find them quickly.
+
+## Validate changes
+
+Run `npm run validate` before sharing changes. The zero-dependency validator checks JavaScript syntax, local Markdown links, example index coverage, the customizable-values convention, and the safe diagnostic logging patterns described in [Logging and reporting](docs/logging-and-reporting.md). The same check runs for pushes and pull requests in GitHub Actions.
 
 ## Additional Resources
 

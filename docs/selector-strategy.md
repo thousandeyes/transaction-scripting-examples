@@ -52,6 +52,8 @@ const checkout = await driver.findElement(By.css('[data-testid="checkout-form"]'
 await checkout.findElement(By.css('button[type="submit"]')).click();
 ```
 
+When a page legitimately renders one of several equivalent controls, keep the candidate locators in an ordered list and use a bounded wait to select the first visible match. Do not use this pattern to hide an unstable selector; prefer an application-owned test ID when one control should always be present. See [find-first-available-element.js](../examples/01-navigation-and-waits/find-first-available-element.js).
+
 ## Iframes and shadow DOM
 
 Selectors do not cross iframe or shadow-root boundaries automatically.
@@ -76,6 +78,10 @@ const host = await driver.findElement(By.css('custom-login'));
 const root = await driver.executeScript('return arguments[0].shadowRoot;', host);
 await root.findElement(By.css('input[name="username"]')).sendKeys(username);
 ```
+
+## Canvas and coordinate interaction
+
+Canvas child elements are drawn content rather than DOM nodes, so Selenium cannot locate them with CSS or XPath. Use a stable selector for the canvas itself, wait for it to be visible, and click coordinates relative to that canvas. Keep the coordinates near the top of the script and treat this approach as more fragile than selecting a real DOM element. See [canvas-coordinate-interaction.js](../examples/07-browser-edge-cases/canvas-coordinate-interaction.js).
 
 ## Maintenance tips
 

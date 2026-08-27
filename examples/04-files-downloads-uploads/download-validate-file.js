@@ -3,6 +3,7 @@ import { createHash } from 'crypto';
 import { By, until } from 'selenium-webdriver';
 import { driver, downloads, markers, test } from 'thousandeyes';
 
+// This section contains the customizable values. Add other customizable elements here for easy editing.
 const IMPLICIT_TIMEOUT_MS = 5 * 1000;
 const EXPECTED_FILE_NAME = 'report.csv';
 const DOWNLOAD_TIMEOUT_MS = 60 * 1000;

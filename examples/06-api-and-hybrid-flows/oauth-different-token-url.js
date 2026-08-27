@@ -2,6 +2,7 @@ import fetch from 'node-fetch';
 import { By, until } from 'selenium-webdriver';
 import { credentials, driver, markers, test } from 'thousandeyes';
 
+// This section contains the customizable values. Add other customizable elements here for easy editing.
 const IMPLICIT_TIMEOUT_MS = 5 * 1000;
 const PAGE_READY_TIMEOUT_MS = 30 * 1000;
 const API_TIMEOUT_MS = 30 * 1000;
@@ -143,12 +144,23 @@ function assertResponseStatus(response, expectedStatus, label) {
 }
 
 async function fetchWithTimeout(url, options, timeoutMs) {
-  return Promise.race([
-    fetch(url, options),
-    new Promise((resolve, reject) => {
-      setTimeout(() => reject(new Error(`Timed out during API request`)), timeoutMs);
-    }),
-  ]);
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    return await fetch(url, {
+      ...options,
+      signal: controller.signal,
+    });
+  } catch (error) {
+    if (error.name === 'AbortError') {
+      throw new Error('Timed out during API request');
+    }
+
+    throw error;
+  } finally {
+    clearTimeout(timeoutId);
+  }
 }
 
 async function waitForPageLoaded(timeoutMs) {

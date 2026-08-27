@@ -12,6 +12,7 @@ The examples in this repository favor diagnostic metadata over raw application d
 - For navigation, log metadata such as `document.readyState`, whether the current origin matches the configured test URL, whether query/hash values exist, path depth, title length, and whether the body is present.
 - For elements, log labels, located count, displayed state, enabled state, and size.
 - For browser console diagnostics, log severity counts only.
+- For browser-console health checks, fail on the count of unexpected severe entries without logging their message bodies.
 - For text assertions, use page text internally but report only that the expected text was missing plus metadata such as text length.
 
 ## Do not log
@@ -41,6 +42,8 @@ async function captureDiagnostics(error) {
 ```
 
 For deeper troubleshooting, add the diagnostic metadata pattern from [evidence-on-failure.js](../examples/03-verification-and-markers/evidence-on-failure.js). That example adds navigation metadata, element state, and browser console severity counts without logging page source, URLs, titles, alert text, or console message bodies.
+
+For a focused browser-console assertion, use [browser-console-errors.js](../examples/03-verification-and-markers/browser-console-errors.js) when console health is part of the transaction's pass/fail criteria. It clears entries from before navigation, counts severe entries after the configured page loads, and fails using only the count. This is different from [evidence-on-failure.js](../examples/03-verification-and-markers/evidence-on-failure.js), which collects console severity counts as diagnostic context after another step has failed but does not make console messages a separate failure condition. Some applications intentionally emit severe entries, so review `EXPECTED_MAX_SEVERE_ERRORS` before using the assertion pattern.
 
 ## API and OAuth reporting
 

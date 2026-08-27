@@ -1,6 +1,7 @@
 import { By, Key, until } from 'selenium-webdriver';
 import { driver, markers, test } from 'thousandeyes';
 
+// This section contains the customizable values. Add other customizable elements here for easy editing.
 const IMPLICIT_TIMEOUT_MS = 5 * 1000;
 const SEARCH_TERM = 'order status';
 const EXPECTED_TEXT = 'Result';
