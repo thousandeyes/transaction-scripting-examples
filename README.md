@@ -13,6 +13,8 @@ Note: this project contains example code and is not covered under ThousandEyes s
 - Handling passwords, TOTP, MFA, or secrets: read [Credentials and secrets](docs/credentials-and-secrets.md).
 - Adding logs, errors, or screenshots: read [Logging and reporting](docs/logging-and-reporting.md).
 - Deciding whether a browser flow should become an API or hybrid test: read [Convert to API test](docs/convert-to-api-test.md).
+- Migrating from the former flat repository layout: use the [legacy example map](docs/deprecation-map.md).
+- Working with raw protocols or request signing: read [Advanced transaction sandbox tests](docs/advanced-sandbox-tests.md) first; these examples are not for beginners and are use at your own risk.
 
 ## Repository map
 
@@ -24,6 +26,7 @@ docs/
   script-debugging.md
   credentials-and-secrets.md
   convert-to-api-test.md
+  deprecation-map.md
 
 examples/
   00-basics/
@@ -34,6 +37,7 @@ examples/
   05-auth-and-mfa/
   06-api-and-hybrid-flows/
   07-browser-edge-cases/
+  08-advanced-transaction-sandbox/
 
 templates/
   transaction-template.js
@@ -55,6 +59,7 @@ scripts/
 | [05-auth-and-mfa](examples/05-auth-and-mfa/) | TOTP, login MFA, and math captcha patterns. |
 | [06-api-and-hybrid-flows](examples/06-api-and-hybrid-flows/) | Browser flows that need API authentication or authenticated API setup before the browser journey. |
 | [07-browser-edge-cases](examples/07-browser-edge-cases/) | Iframes, shadow DOM, native alerts, new tabs/windows, hover menus, state, popups, and consent banners. |
+| [08-advanced-transaction-sandbox](examples/08-advanced-transaction-sandbox/) | Advanced raw TCP, TLS, IMAP, SMTP, and HMAC transaction scripts; not for beginners. |
 
 ## Transaction Test Tricks and Tips
 

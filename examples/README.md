@@ -12,6 +12,7 @@ Examples are grouped by the problem they teach. Each script is designed to be co
 - [05-auth-and-mfa](05-auth-and-mfa/) - TOTP, login MFA, math captcha.
 - [06-api-and-hybrid-flows](06-api-and-hybrid-flows/) - OAuth client credentials, Bearer token, Basic auth, API key authentication, different OAuth token URLs, and authenticated API setup before browser flows.
 - [07-browser-edge-cases](07-browser-edge-cases/) - iframes, shadow DOM, alerts, tabs, URL-based tab selection, hover, canvas, state, and popups.
+- [08-advanced-transaction-sandbox](08-advanced-transaction-sandbox/) - advanced raw TCP, TLS, IMAP, SMTP, and HMAC transaction scripts; not for beginners and use at your own risk.
 
 ## How to choose an example
 
@@ -20,6 +21,8 @@ Examples are grouped by the problem they teach. Each script is designed to be co
 - Keep selectors and other user-defined constants grouped near the top while adapting.
 - Add markers around business steps, not every click.
 - Replace sleeps with waits tied to application state.
+- If you are looking for a former flat-layout example, use the [legacy example map](../docs/deprecation-map.md).
+- For raw protocol or request-signing work, read [Advanced transaction sandbox tests](../docs/advanced-sandbox-tests.md) first. These examples are not for beginners.
 
 ## Find an example by problem
 
